@@ -218,7 +218,7 @@ abstract public class GAOptimizer {
         return parent1.fromEncoded(indexes1);
     }
     
-    // unit-three cross over
+    // uni-three cross over
     private Chromosome uniThreeParentCrossOverUncheck(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
                 
