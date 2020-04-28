@@ -14,7 +14,6 @@ abstract public class GAOptimizer {
         ROULETTE,
         TOURNAMENT,
         REFINED,
-        CUSTOM
     }
     
     public static enum CrossOverType {
@@ -22,17 +21,16 @@ abstract public class GAOptimizer {
         ONE_POINT,
         UNI_THREE_PARENT,
         UNI_ONE_POINT,
-        CUSTOM
     }
     
     public static enum MutationType {
         MUTATE_POINT,
         SWITCH_POINT,
-        CUSTOM
     }
 
     protected Chromosome[] population;
     protected double chromosomeMutationRate;
+    protected int eliteSize;
     protected int crossOverPoolSize;
     protected SelectionType selectionType;
     protected CrossOverType crossOverType;
@@ -43,22 +41,24 @@ abstract public class GAOptimizer {
     
     protected abstract Chromosome newRandomChromosome(Random rand);
         
-    public GAOptimizer(int populationSize, int crossOverPoolSize, double mutationRate, SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType, Map<String, Object> params) {
+    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate, SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType, Map<String, Object> params) {
         population = new Chromosome[populationSize];
         for(int i = 0; i < populationSize; i++) {
             population[i] = newRandomChromosome(rand);
-        }
-                    
-        this.selectionType = selectionType;
+        }                    
+        
+        this.eliteSize = eliteSize;
         this.crossOverPoolSize = crossOverPoolSize;
         this.chromosomeMutationRate = mutationRate;
+        
+        this.selectionType = selectionType;
         this.crossOverType = crossOverType;
         this.mutationType = mutationType;
         this.params = params;
     }
     
-    public GAOptimizer(int populationSize, int crossOverPoolSize, double mutationRate, SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType) {
-        this(populationSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, new HashMap<>());
+    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate, SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType) {
+        this(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, new HashMap<>());
     }
     
     protected Chromosome[] selectParents() {
@@ -262,7 +262,7 @@ abstract public class GAOptimizer {
         for(int i = 0; i < k; i++) indexes.remove((Integer) c.encoded[i]);
         
         for(int i = 0; i < k; i++) {
-            if(rand.nextDouble() < bitMutationRate) {
+            if(rand.nextDouble() < bitMutationRate && indexes.size() > 0) {
                 int r = (int)(rand.nextDouble() * indexes.size());
                 int tmp = c.encoded[i];
                 c.encoded[i] = indexes.remove(r);
@@ -301,9 +301,9 @@ abstract public class GAOptimizer {
     
     private void nextGeneration() {
         Chromosome[] parents = selectParents();
-        Chromosome[] children = new Chromosome[crossOverPoolSize];
+        Chromosome[] children = new Chromosome[population.length - eliteSize];
         
-        for(int i = 0; i < crossOverPoolSize; i++) {
+        for(int i = 0; i < population.length - eliteSize; i++) {
             Chromosome parent1 = parents[(int)(rand.nextDouble() * crossOverPoolSize)];
             
             Chromosome parent2;
@@ -330,12 +330,11 @@ abstract public class GAOptimizer {
         }
         
         List<Chromosome> newPopulation = new ArrayList<>();
-        newPopulation.addAll(Arrays.asList(population).subList(0, population.length/2));
+        newPopulation.addAll(Arrays.asList(population).subList(0, eliteSize));
         newPopulation.addAll(Arrays.asList(children));
         
         population = newPopulation.stream()
                 .sorted((c1, c2) -> Double.compare(c2.getFitness(), c1.getFitness()))
-                .limit(population.length)
                 .collect(Collectors.toList())
                 .toArray(new Chromosome[0]);
         

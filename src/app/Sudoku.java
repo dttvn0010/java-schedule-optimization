@@ -1,8 +1,8 @@
 package app;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import api.Chromosome;
@@ -43,7 +43,9 @@ public class Sudoku {
             for(int i = 0; i < 9; i++) {
                 Set<Integer> s = new HashSet<>();
                 for(int j = 0; j < 9; j++) {
-                    s.add(encoded[9*j + i]);
+                	int val = encoded[9*j + i];
+                	if(fixedIndexes[i][j] >= 0 && val != fixedIndexes[i][j]) continue;
+                    s.add(val);
                 }
                 int n = s.size();
                 if(n == 9) {
@@ -59,7 +61,10 @@ public class Sudoku {
                     
                     for(int i = 0; i < 3; i++) {
                         for(int j = 0; j < 3; j++) {
-                            s.add(encoded[9*(3*y+i) + (3*x+j)]);
+                        	int row = 3*y+i, col = 3*x+j;
+                        	int val = encoded[9*row + col];
+                        	if(fixedIndexes[row][col] >= 0 && val != fixedIndexes[row][col]) continue;                        	
+                            s.add(val);
                         }
                     }
                     
@@ -80,10 +85,9 @@ public class Sudoku {
             encoded = new int[9*9];
             
             for(int i = 0; i < 9; i++) {
-                int[] tmp = CombinationUtil.genPermation(9, fixedIndexes[i], rand);
+                int[] tmp = CombinationUtil.genPermation(9, rand);
                 System.arraycopy(tmp, 0, encoded, 9*i, 9);
-            }
-            
+            }                      
         }
 
         @Override
@@ -94,86 +98,28 @@ public class Sudoku {
     
     static class SudokuGAOptimizer extends GAOptimizer {
                 
-        private double bitMutationRate = 0.3;
-        
-        public SudokuGAOptimizer(int populationSize, int crossOverPoolSize, double mutationRate,
-                SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType) {
-            super(populationSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType);
+        public SudokuGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
+                SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
+                Map<String, Object> params) {
+            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
         }
         
         @Override
         protected Chromosome newRandomChromosome(Random rand) {
             return new SudokuChromosome(rand);
-        }        
-        
-        @Override
-        protected Chromosome crossOver(Chromosome[] parents) {
-            SudokuChromosome parent1 = (SudokuChromosome) parents[0];
-            SudokuChromosome parent2 = (SudokuChromosome) parents[1];
-            
-            int[] encoded = new int[9*9];
-            
-            for(int i = 0; i < 9; i++) {
-                int[] indexes1 = new int[9];
-                System.arraycopy(parent1.encoded, 9*i , indexes1, 0, 9);
-                
-                List<Integer> indexes2 = new ArrayList<>();
-                
-                for(int j = 0; j < 9; j++) {
-                    if(fixedIndexes[i][j] < 0) {
-                        indexes2.add(parent2.encoded[9*i+j]);
-                    }
-                }
-                
-                for(int j = 0; j < 9; j++) {
-                    if(fixedIndexes[i][j] >= 0) continue;
-                    
-                    if(rand.nextBoolean()) {
-                        indexes2.remove((Integer) indexes1[j]);
-                    }else {
-                        indexes1[j] = -1;
-                    }
-                }
-                
-                for(int j = 0; j < 9; j++) {
-                    if(indexes1[j] < 0) {
-                        indexes1[j] = indexes2.remove(0);
-                    }
-                }
-                
-                System.arraycopy(indexes1, 0, encoded, 9*i, 9);
-            }
-            
-            return new SudokuChromosome(encoded);            
         }
-        
-        @Override
-        protected void mutateChromosome(Chromosome c) {
-            for(int i = 0; i < 9; i++) {
-                for(int j = 0;  j < 9; j++) {
-                    if(fixedIndexes[i][j] >= 0) continue;
-                    
-                    if(rand.nextDouble() < bitMutationRate) {
-                        int k;
-                        do {
-                            k = (int) (rand.nextDouble() * 9);
-                        }while(fixedIndexes[i][k] >= 0 || k == j);
-                        
-                        int tmp = c.encoded[9*i + j];
-                        c.encoded[9*i+j] = c.encoded[9*i+k];
-                        c.encoded[9*i+k] = tmp;
-                        c.clearFitness();
-                    }
-                }
-            }
-        }    
-    }    
+    }
     
     public static void main(String[] args) {
-        GAOptimizer gaOptimizer = new SudokuGAOptimizer(100, 200, 0.5, 
+    	Map<String, Object> params = new HashMap<>();
+        params.put("maxIndex", 9);
+        params.put("bitMutationRate", 0.2);
+        
+        GAOptimizer gaOptimizer = new SudokuGAOptimizer(200, 20, 100, 0.1, 
                                         SelectionType.ROULETTE,
-                                        CrossOverType.CUSTOM, 
-                                        MutationType.CUSTOM);
+                                        CrossOverType.ONE_POINT, 
+                                        MutationType.SWITCH_POINT,
+                                        params);
         gaOptimizer.run(5000);
     }    
 }

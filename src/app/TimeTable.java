@@ -144,10 +144,10 @@ public class TimeTable {
     
     static class TimeTableGAOptimizer extends GAOptimizer {        
         
-        public TimeTableGAOptimizer(int populationSize, int crossOverPoolSize, double mutationRate,
+        public TimeTableGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
                 SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
                 Map<String, Object> params) {
-            super(populationSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
+            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
         }
 
         @Override
@@ -161,7 +161,7 @@ public class TimeTable {
         params.put("maxIndex", N);
         params.put("bitMutationRate", 0.2);
         
-        GAOptimizer gaOptimizer = new TimeTableGAOptimizer(40, 20, 0.1,
+        GAOptimizer gaOptimizer = new TimeTableGAOptimizer(100, 20, 50, 0.1,
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.MUTATE_POINT,

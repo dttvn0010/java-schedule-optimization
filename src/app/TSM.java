@@ -68,10 +68,10 @@ public class TSM {
     
     static class TSMGAOptimizer extends GAOptimizer {
     
-        public TSMGAOptimizer(int populationSize, int crossOverPoolSize, double mutationRate,
+        public TSMGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
                 SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType, 
                 Map<String, Object> params) {
-            super(populationSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
+            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
         }
 
         @Override
@@ -86,7 +86,7 @@ public class TSM {
         Map<String, Object> params = new HashMap<>();
         params.put("bitMutationRate", 0.2);
         
-        GAOptimizer gaOptimizer = new TSMGAOptimizer(40, 20, 0.05, 
+        GAOptimizer gaOptimizer = new TSMGAOptimizer(100, 10, 50, 0.05, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.SWITCH_POINT, 
