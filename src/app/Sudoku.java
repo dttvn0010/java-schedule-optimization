@@ -10,21 +10,28 @@ import api.GAOptimizer;
 import api.GAOptimizer.CrossOverType;
 import api.GAOptimizer.MutationType;
 import api.GAOptimizer.SelectionType;
-import util.CombinationUtil;
 
 public class Sudoku {
 
-    static int[][] fixedIndexes = {
-            {0,  -1,  -1, -1, -1,  5,  7,  2, -1},
-            {-1,  7,  -1,  4,  6,  2, -1,  8, -1},
-            {-1, -1,  -1, -1,  1,  7, -1, -1, -1},
-            {-1,  6,  -1,  2, -1,  0,  8,  7, -1},
-            {4,   3,   8, -1,  7,  6,  5,  0, -1},
-            {7,  -1,  -1,  3, -1,  8,  1, -1, -1},
-            {-1, -1,  -1, -1, -1,  1,  2, -1, -1},
-            {6,   5,   2, -1, -1, -1, -1, -1,  8},
-            {8,   1,   7,  6, -1, -1,  4, -1 , 1}            
+    static int[] initials = {
+            1,  0,  0,  0,  0,  6,  8,  3,  0,
+            0,  8,  0,  5,  7,  3,  0,  9,  0,
+            0,  0,  0,  0,  2,  8,  0,  0,  0,
+            0,  7,  0,  3,  0,  1,  9,  8,  0,
+            5,  4,  9,  0,  8,  7,  6,  1,  0,
+            8,  0,  0,  4,  0,  9,  2,  0,  0,
+            0,  0,  0,  0,  0,  2,  3,  0,  0,
+            7,  6,  3,  0,  0,  0,  0,  0,  9,
+            9,  2,  8,  7,  0,  0,  5,  0 , 0            
     };
+    
+    static int N = 0;
+    
+    static {
+    	for(int val : initials) {
+    		if(val == 0) N++;
+    	}
+    }
     
     static class SudokuChromosome extends Chromosome {
 
@@ -39,20 +46,23 @@ public class Sudoku {
         @Override
         protected double calcFitness() {
             double score  = 0;
+            int[] table = new int[9*9];
+            int index = 0;
+            
+            for(int i = 0; i < 9*9; i++) {
+            	if(initials[i] > 0) {
+            		table[i] = initials[i] - 1;
+            	}else {
+            		table[i]= encoded[index++];
+            	}
+            }
             
             for(int i = 0; i < 9; i++) {
                 Set<Integer> s = new HashSet<>();
                 for(int j = 0; j < 9; j++) {
-                	int val = encoded[9*j + i];
-                	if(fixedIndexes[i][j] >= 0 && val != fixedIndexes[i][j]) continue;
-                    s.add(val);
+                    s.add(table[9*j + i]);
                 }
-                int n = s.size();
-                if(n == 9) {
-                    score += 1;
-                }else {
-                    score += n/9.0;
-                }
+                score += s.size()/9.0;
             }
             
             for(int y = 0; y < 3; y++) {
@@ -62,18 +72,11 @@ public class Sudoku {
                     for(int i = 0; i < 3; i++) {
                         for(int j = 0; j < 3; j++) {
                         	int row = 3*y+i, col = 3*x+j;
-                        	int val = encoded[9*row + col];
-                        	if(fixedIndexes[row][col] >= 0 && val != fixedIndexes[row][col]) continue;                        	
-                            s.add(val);
+                        	s.add(table[9*row + col]);
                         }
                     }
                     
-                    int n = s.size();
-                    if(n == 9) {
-                        score += 1;
-                    }else {
-                        score += n/9.0;
-                    }
+                    score += s.size()/9.0;
                 }
             }
             
@@ -82,11 +85,10 @@ public class Sudoku {
 
         @Override
         protected void randomInit(Random rand) {
-            encoded = new int[9*9];
+            encoded = new int[N];
             
-            for(int i = 0; i < 9; i++) {
-                int[] tmp = CombinationUtil.genPermation(9, rand);
-                System.arraycopy(tmp, 0, encoded, 9*i, 9);
+            for(int i = 0; i < N; i++) {
+                encoded[i] = (int)(rand.nextDouble() * 9);
             }                      
         }
 
@@ -113,11 +115,11 @@ public class Sudoku {
     public static void main(String[] args) {
     	Map<String, Object> params = new HashMap<>();
         params.put("maxIndex", 9);
-        params.put("bitMutationRate", 0.2);
+        params.put("bitMutationRate", 0.1);
         
-        GAOptimizer gaOptimizer = new SudokuGAOptimizer(200, 20, 100, 0.1, 
+        GAOptimizer gaOptimizer = new SudokuGAOptimizer(500, 50, 500, 0.1, 
                                         SelectionType.ROULETTE,
-                                        CrossOverType.ONE_POINT, 
+                                        CrossOverType.UNIFORM, 
                                         MutationType.MUTATE_POINT,
                                         params);
         gaOptimizer.run(5000);
