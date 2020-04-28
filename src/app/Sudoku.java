@@ -101,7 +101,7 @@ public class Sudoku {
         public SudokuGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
                 SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
                 Map<String, Object> params) {
-            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
+            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, false, params);
         }
         
         @Override
@@ -118,7 +118,7 @@ public class Sudoku {
         GAOptimizer gaOptimizer = new SudokuGAOptimizer(200, 20, 100, 0.1, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.ONE_POINT, 
-                                        MutationType.MUTATE_POINT_UNCHECK,
+                                        MutationType.MUTATE_POINT,
                                         params);
         gaOptimizer.run(5000);
     }    

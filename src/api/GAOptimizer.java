@@ -25,7 +25,6 @@ abstract public class GAOptimizer {
     
     public static enum MutationType {
         MUTATE_POINT,
-        MUTATE_POINT_UNCHECK,
         SWITCH_POINT,        
     }
 
@@ -38,11 +37,15 @@ abstract public class GAOptimizer {
     protected MutationType mutationType;
     protected Random rand = new Random();
     protected int generation = 0;
-    protected Map<String, Object> params;
+    protected boolean checkUnique;
+    protected Map<String, Object> extraParams;
     
     protected abstract Chromosome newRandomChromosome(Random rand);
         
-    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate, SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType, Map<String, Object> params) {
+    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
+    					SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
+    					boolean checkUnique, Map<String, Object> params) {
+    	
         population = new Chromosome[populationSize];
         for(int i = 0; i < populationSize; i++) {
             population[i] = newRandomChromosome(rand);
@@ -55,11 +58,15 @@ abstract public class GAOptimizer {
         this.selectionType = selectionType;
         this.crossOverType = crossOverType;
         this.mutationType = mutationType;
-        this.params = params;
+        this.checkUnique = checkUnique;
+        this.extraParams = params;
     }
     
-    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate, SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType) {
-        this(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, new HashMap<>());
+    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate, 
+    					SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
+    					boolean checkUnique) {
+        this(populationSize, eliteSize, crossOverPoolSize, mutationRate, 
+    			selectionType, crossOverType, mutationType, checkUnique, new HashMap<>());
     }
     
     protected Chromosome[] selectParents() {
@@ -68,12 +75,12 @@ abstract public class GAOptimizer {
         }
         
         if(selectionType == SelectionType.TOURNAMENT) {
-            double tournamentThresh = (Double) params.get("tournamentThresh");
+            double tournamentThresh = (Double) extraParams.get("tournamentThresh");
             return tournamentSelectParents(population, crossOverPoolSize, tournamentThresh);
         }
         
         if(selectionType == SelectionType.REFINED) {
-            double tournamentThresh = (Double) params.get("tournamentThresh");
+            double tournamentThresh = (Double) extraParams.get("tournamentThresh");
             return refineSelectParents(population, crossOverPoolSize, tournamentThresh);
         }
         
@@ -125,6 +132,24 @@ abstract public class GAOptimizer {
         return rouletteSelectParents(pool2, nSelected);
     }
         
+    // Uniform crossover
+    private Chromosome uniformCrossOverUncheck(Chromosome[] parents) {
+        Chromosome parent1 = parents[0], parent2 =  parents[1];
+        
+        int N = parent1.encoded.length;
+        int[] indexes = new int[N];
+        
+        for(int i = 0; i < N; i++) {
+            if(rand.nextBoolean()) {
+            	indexes[i] = parent1.encoded[i];
+            }else {
+            	indexes[i] = parent2.encoded[i];
+            }
+        }
+   
+        return parent1.fromEncoded(indexes);
+    }
+    
     private Chromosome uniformCrossOver(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1];
         
@@ -150,6 +175,26 @@ abstract public class GAOptimizer {
         }
         return parent1.fromEncoded(indexes1);
     }
+        
+    // One point cross over
+    private Chromosome onePointCrossOverUncheck(Chromosome[] parents) {
+        Chromosome parent1 = parents[0], parent2 =  parents[1];
+        
+        int N = parent1.encoded.length;
+        int[] indexes = new int[N];
+
+        int p = (int) (rand.nextDouble() * N);        // cross over point
+        for(int i = 0; i < p; i++) {
+        	indexes[i] = parent1.encoded[i];
+        }
+                
+        for(int i = p; i < N; i++) {
+        	indexes[i] = parent2.encoded[i];
+        }
+        
+        return parent1.fromEncoded(indexes);
+    }
+    
     
     private Chromosome onePointCrossOver(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1];
@@ -171,6 +216,24 @@ abstract public class GAOptimizer {
         }
         
         return parent1.fromEncoded(indexes1);
+    }
+    
+    // unit-three cross over
+    private Chromosome uniThreeParentCrossOverUncheck(Chromosome[] parents) {
+        Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
+                
+        int N = parent1.encoded.length;
+        int[] indexes = new int[N];
+
+        for(int i = 0; i < N; i++) {
+            if(parent1.encoded[i] == parent2.encoded[i]) {
+                indexes[i] = parent1.encoded[i];
+            }else {
+            	indexes[i] = parent3.encoded[i];
+            }
+        }
+        
+        return parent1.fromEncoded(indexes);
     }
     
     private Chromosome uniThreeParentCrossOver(Chromosome[] parents) {
@@ -199,6 +262,16 @@ abstract public class GAOptimizer {
         return parent1.fromEncoded(indexes1);
     }
     
+    // uni-one-point cross over
+    private Chromosome uniOnePointCrossOverUncheck(Chromosome[] parents) {
+        Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
+        
+        return onePointCrossOverUncheck(new Chromosome[] {
+            uniformCrossOverUncheck(new Chromosome[] {parent1, parent2}),
+            parent3
+        });        
+    }
+    
     private Chromosome uniOnePointCrossOver(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
         
@@ -217,26 +290,27 @@ abstract public class GAOptimizer {
     
     protected Chromosome crossOver(Chromosome[] parents) {
         if(crossOverType == CrossOverType.UNIFORM) {
-            return uniformCrossOver(parents);
+            return checkUnique? uniformCrossOver(parents) : uniformCrossOverUncheck(parents);
         }
         
         if(crossOverType == CrossOverType.ONE_POINT) {
-            return onePointCrossOver(parents);
+            return checkUnique? onePointCrossOver(parents) : onePointCrossOverUncheck(parents);
         }
         
         if(crossOverType == CrossOverType.UNI_THREE_PARENT) {
-            return uniThreeParentCrossOver(parents);
+            return checkUnique? uniThreeParentCrossOver(parents) : uniThreeParentCrossOverUncheck(parents);
         }
         
         if(crossOverType == CrossOverType.UNI_ONE_POINT) {
-            return uniOnePointCrossOver(parents);
+            return checkUnique? uniOnePointCrossOver(parents) : uniOnePointCrossOverUncheck(parents);
         }
         
         throw new RuntimeException("Unsupported crossover type: " + crossOverPoolSize);
     }
     
-    private void mutateSwitchPoint(Chromosome c) {
-        double bitMutationRate = (Double) params.get("bitMutationRate");
+    // Mutate switch point   
+    private boolean mutateSwitchPoint(Chromosome c) {
+        double bitMutationRate = (Double) extraParams.get("bitMutationRate");
         int N = c.encoded.length;
         
         for(int i = 0; i < N; i++) {
@@ -248,52 +322,54 @@ abstract public class GAOptimizer {
                 c.encoded[j] = tmp;
                 c.clearFitness();
             }
-        }        
+        }    
+        return true;
     }
     
-    private void mutateOnePoint(Chromosome c, boolean checkDuplicate) {
-        double bitMutationRate = (Double) params.get("bitMutationRate");
-        int N = (Integer) params.getOrDefault("maxIndex", c.encoded.length);
+    // Mutate one point
+    private boolean mutateOnePointUncheck(Chromosome c) {
+        double bitMutationRate = (Double) extraParams.get("bitMutationRate");
+        int N = (Integer) extraParams.getOrDefault("maxIndex", c.encoded.length);
+        
+        for(int i = 0; i < c.encoded.length; i++) {
+            if(rand.nextDouble() < bitMutationRate) {
+            	c.encoded[i] = (int)(rand.nextDouble() * N);                
+                c.clearFitness();
+            }
+        }
+        return true;
+    }
+    
+    private boolean mutateOnePoint(Chromosome c) {
+        double bitMutationRate = (Double) extraParams.get("bitMutationRate");
+        int N = (Integer) extraParams.getOrDefault("maxIndex", c.encoded.length);
         int k = c.encoded.length;
         
         List<Integer> indexes = new ArrayList<>();
         
         for(int i = 0; i < N; i++) indexes.add(i);
         
-        if(checkDuplicate) {
-        	for(int i = 0; i < k; i++) indexes.remove((Integer) c.encoded[i]);
-        }
+        for(int i = 0; i < k; i++) indexes.remove((Integer) c.encoded[i]);
         
         for(int i = 0; i < k; i++) {
             if(rand.nextDouble() < bitMutationRate && indexes.size() > 0) {
                 int r = (int)(rand.nextDouble() * indexes.size());
                 int tmp = c.encoded[i];
-                c.encoded[i] = indexes.get(r);
-                
-                if(checkDuplicate) {
-	                indexes.remove(r);
-	                indexes.add(tmp);
-                }
-                
+                c.encoded[i] = indexes.remove(r);
+                indexes.add(tmp);                
                 c.clearFitness();
             }
         }
+        return true;
     }
            
-    protected void mutateChromosome(Chromosome c) {
+    protected boolean mutateChromosome(Chromosome c) {
         if(mutationType == MutationType.SWITCH_POINT) {
-            mutateSwitchPoint(c);
-            return;
+            return mutateSwitchPoint(c); 
         }
         
         if(mutationType == MutationType.MUTATE_POINT) {
-            mutateOnePoint(c, true);
-            return;
-        }
-        
-        if(mutationType == MutationType.MUTATE_POINT_UNCHECK) {
-        	mutateOnePoint(c, false);
-        	return;
+            return checkUnique? mutateOnePoint(c) : mutateOnePointUncheck(c);
         }
         
         throw new RuntimeException("Unsupported mutation type: " + mutationType);

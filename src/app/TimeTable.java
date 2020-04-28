@@ -147,7 +147,7 @@ public class TimeTable {
         public TimeTableGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
                 SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
                 Map<String, Object> params) {
-            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, params);
+            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, true, params);
         }
 
         @Override
