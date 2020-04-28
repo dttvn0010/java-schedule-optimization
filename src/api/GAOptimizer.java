@@ -25,7 +25,8 @@ abstract public class GAOptimizer {
     
     public static enum MutationType {
         MUTATE_POINT,
-        SWITCH_POINT,
+        MUTATE_POINT_UNCHECK,
+        SWITCH_POINT,        
     }
 
     protected Chromosome[] population;
@@ -250,7 +251,7 @@ abstract public class GAOptimizer {
         }        
     }
     
-    private void mutateOnePoint(Chromosome c) {
+    private void mutateOnePoint(Chromosome c, boolean checkDuplicate) {
         double bitMutationRate = (Double) params.get("bitMutationRate");
         int N = (Integer) params.getOrDefault("maxIndex", c.encoded.length);
         int k = c.encoded.length;
@@ -259,19 +260,26 @@ abstract public class GAOptimizer {
         
         for(int i = 0; i < N; i++) indexes.add(i);
         
-        for(int i = 0; i < k; i++) indexes.remove((Integer) c.encoded[i]);
+        if(checkDuplicate) {
+        	for(int i = 0; i < k; i++) indexes.remove((Integer) c.encoded[i]);
+        }
         
         for(int i = 0; i < k; i++) {
             if(rand.nextDouble() < bitMutationRate && indexes.size() > 0) {
                 int r = (int)(rand.nextDouble() * indexes.size());
                 int tmp = c.encoded[i];
-                c.encoded[i] = indexes.remove(r);
-                indexes.add(tmp);
+                c.encoded[i] = indexes.get(r);
+                
+                if(checkDuplicate) {
+	                indexes.remove(r);
+	                indexes.add(tmp);
+                }
+                
                 c.clearFitness();
             }
         }
     }
-        
+           
     protected void mutateChromosome(Chromosome c) {
         if(mutationType == MutationType.SWITCH_POINT) {
             mutateSwitchPoint(c);
@@ -279,8 +287,13 @@ abstract public class GAOptimizer {
         }
         
         if(mutationType == MutationType.MUTATE_POINT) {
-            mutateOnePoint(c);
+            mutateOnePoint(c, true);
             return;
+        }
+        
+        if(mutationType == MutationType.MUTATE_POINT_UNCHECK) {
+        	mutateOnePoint(c, false);
+        	return;
         }
         
         throw new RuntimeException("Unsupported mutation type: " + mutationType);

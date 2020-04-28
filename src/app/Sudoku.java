@@ -118,7 +118,7 @@ public class Sudoku {
         GAOptimizer gaOptimizer = new SudokuGAOptimizer(200, 20, 100, 0.1, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.ONE_POINT, 
-                                        MutationType.SWITCH_POINT,
+                                        MutationType.MUTATE_POINT_UNCHECK,
                                         params);
         gaOptimizer.run(5000);
     }    
