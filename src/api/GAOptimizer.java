@@ -342,8 +342,7 @@ abstract public class GAOptimizer {
     }
             
     public void run(int numStep) {
-        printInfo();
-        
+
         for(int i = 0; i < numStep; i++) {                
             nextGeneration();
             printInfo();
