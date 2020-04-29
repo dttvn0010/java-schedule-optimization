@@ -30,9 +30,9 @@ public class Sudoku {
     static int N = 0;
     
     static {
-    	for(int val : initials) {
-    		if(val == 0) N++;
-    	}
+        for(int val : initials) {
+            if(val == 0) N++;
+        }
     }
     
     static class SudokuChromosome extends Chromosome {
@@ -52,11 +52,11 @@ public class Sudoku {
             int index = 0;
             
             for(int i = 0; i < 9*9; i++) {
-            	if(initials[i] > 0) {
-            		table[i] = initials[i] - 1;
-            	}else {
-            		table[i]= encoded[index++];
-            	}
+                if(initials[i] > 0) {
+                    table[i] = initials[i] - 1;
+                }else {
+                    table[i]= encoded[index++];
+                }
             }
             
             for(int i = 0; i < 9; i++) {
@@ -73,8 +73,8 @@ public class Sudoku {
                     
                     for(int i = 0; i < 3; i++) {
                         for(int j = 0; j < 3; j++) {
-                        	int row = 3*y+i, col = 3*x+j;
-                        	s.add(table[9*row + col]);
+                            int row = 3*y+i, col = 3*x+j;
+                            s.add(table[9*row + col]);
                         }
                     }
                     
@@ -101,18 +101,18 @@ public class Sudoku {
     }
     
     public static void main(String[] args) {
-    	Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("maxIndex", 9);
         params.put("bitMutationRate", 0.1);
         
         List<Chromosome> initialPopulation = new ArrayList<>();
         Random rand = new Random();
         for(int i = 0; i < 500; i++) {
-        	initialPopulation.add(new SudokuChromosome(rand));
+            initialPopulation.add(new SudokuChromosome(rand));
         }
         
         GAOptimizer gaOptimizer = new GAOptimizer(initialPopulation,
-        								50, 500, 0.1, 
+                                        50, 500, 0.1, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.MUTATE_POINT,

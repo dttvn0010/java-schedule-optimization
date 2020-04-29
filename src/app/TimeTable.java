@@ -152,11 +152,11 @@ public class TimeTable {
         List<Chromosome> initialPopulation = new ArrayList<>();
         Random rand = new Random();
         for(int i = 0; i < 100; i++) {
-        	initialPopulation.add(new TimeTableChromosome(rand));
+            initialPopulation.add(new TimeTableChromosome(rand));
         }
         
         GAOptimizer gaOptimizer = new GAOptimizer(initialPopulation, 
-        								20, 50, 0.1,
+                                        20, 50, 0.1,
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.MUTATE_POINT,

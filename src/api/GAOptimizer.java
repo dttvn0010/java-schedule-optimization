@@ -42,9 +42,9 @@ public class GAOptimizer {
     
         
     public GAOptimizer(List<Chromosome> initialPopulation, int eliteSize, int crossOverPoolSize, double mutationRate,
-    					SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
-    					boolean checkUnique, Map<String, Object> params) {
-    	
+                        SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
+                        boolean checkUnique, Map<String, Object> params) {
+        
         this.population = initialPopulation.toArray(new Chromosome[0]);
         this.eliteSize = eliteSize;
         this.crossOverPoolSize = crossOverPoolSize;
@@ -58,10 +58,10 @@ public class GAOptimizer {
     }
     
     public GAOptimizer(List<Chromosome> initialPopulation, int eliteSize, int crossOverPoolSize, double mutationRate, 
-    					SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
-    					boolean checkUnique) {
+                        SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
+                        boolean checkUnique) {
         this(initialPopulation, eliteSize, crossOverPoolSize, mutationRate, 
-    			selectionType, crossOverType, mutationType, checkUnique, new HashMap<>());
+                selectionType, crossOverType, mutationType, checkUnique, new HashMap<>());
     }
     
     protected Chromosome[] selectParents() {
@@ -136,9 +136,9 @@ public class GAOptimizer {
         
         for(int i = 0; i < N; i++) {
             if(rand.nextBoolean()) {
-            	indexes[i] = parent1.encoded[i];
+                indexes[i] = parent1.encoded[i];
             }else {
-            	indexes[i] = parent2.encoded[i];
+                indexes[i] = parent2.encoded[i];
             }
         }
    
@@ -180,11 +180,11 @@ public class GAOptimizer {
 
         int p = (int) (rand.nextDouble() * N);        // cross over point
         for(int i = 0; i < p; i++) {
-        	indexes[i] = parent1.encoded[i];
+            indexes[i] = parent1.encoded[i];
         }
                 
         for(int i = p; i < N; i++) {
-        	indexes[i] = parent2.encoded[i];
+            indexes[i] = parent2.encoded[i];
         }
         
         return parent1.fromEncoded(indexes);
@@ -224,7 +224,7 @@ public class GAOptimizer {
             if(parent1.encoded[i] == parent2.encoded[i]) {
                 indexes[i] = parent1.encoded[i];
             }else {
-            	indexes[i] = parent3.encoded[i];
+                indexes[i] = parent3.encoded[i];
             }
         }
         
@@ -328,7 +328,7 @@ public class GAOptimizer {
         
         for(int i = 0; i < c.encoded.length; i++) {
             if(rand.nextDouble() < bitMutationRate) {
-            	c.encoded[i] = (int)(rand.nextDouble() * N);                
+                c.encoded[i] = (int)(rand.nextDouble() * N);                
                 c.clearFitness();
             }
         }

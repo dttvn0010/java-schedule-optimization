@@ -11,7 +11,7 @@ public class CombinationUtil {
     }
     
     public static int[] genPermation(int N, Random rand) {
-    	return genCombination(N, N, rand);
+        return genCombination(N, N, rand);
     }
     
     public static int[] genCombination(int N, int k) {
@@ -30,7 +30,7 @@ public class CombinationUtil {
         int[] result = new int[k];
         
         for(int i = 0; i < k; i++) {
-        	int r = (int) (rand.nextDouble() * indexes.size());
+            int r = (int) (rand.nextDouble() * indexes.size());
             result[i] = indexes.get(r);
             indexes.remove(r);
         }

@@ -75,11 +75,11 @@ public class TSM {
         List<Chromosome> initialPopulation = new ArrayList<>();
         Random rand = new Random();
         for(int i = 0; i < 100; i++) {
-        	initialPopulation.add(new TSMChromosome(rand));
+            initialPopulation.add(new TSMChromosome(rand));
         }
         
         GAOptimizer gaOptimizer = new GAOptimizer(initialPopulation, 
-        								10, 50, 0.05, 
+                                        10, 50, 0.05, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.SWITCH_POINT, 
