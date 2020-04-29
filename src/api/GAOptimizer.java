@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-abstract public class GAOptimizer {
+public class GAOptimizer {
     
     public static enum SelectionType {
         ROULETTE,
@@ -40,17 +40,12 @@ abstract public class GAOptimizer {
     protected boolean checkUnique;
     protected Map<String, Object> extraParams;
     
-    protected abstract Chromosome newRandomChromosome(Random rand);
         
-    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
+    public GAOptimizer(List<Chromosome> initialPopulation, int eliteSize, int crossOverPoolSize, double mutationRate,
     					SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
     					boolean checkUnique, Map<String, Object> params) {
     	
-        population = new Chromosome[populationSize];
-        for(int i = 0; i < populationSize; i++) {
-            population[i] = newRandomChromosome(rand);
-        }                    
-        
+        this.population = initialPopulation.toArray(new Chromosome[0]);
         this.eliteSize = eliteSize;
         this.crossOverPoolSize = crossOverPoolSize;
         this.chromosomeMutationRate = mutationRate;
@@ -62,10 +57,10 @@ abstract public class GAOptimizer {
         this.extraParams = params;
     }
     
-    public GAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate, 
+    public GAOptimizer(List<Chromosome> initialPopulation, int eliteSize, int crossOverPoolSize, double mutationRate, 
     					SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
     					boolean checkUnique) {
-        this(populationSize, eliteSize, crossOverPoolSize, mutationRate, 
+        this(initialPopulation, eliteSize, crossOverPoolSize, mutationRate, 
     			selectionType, crossOverType, mutationType, checkUnique, new HashMap<>());
     }
     

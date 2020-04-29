@@ -1,7 +1,9 @@
 package app;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -142,30 +144,23 @@ public class TimeTable {
         }        
     }
     
-    static class TimeTableGAOptimizer extends GAOptimizer {        
-        
-        public TimeTableGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
-                SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
-                Map<String, Object> params) {
-            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, true, params);
-        }
-
-        @Override
-        protected Chromosome newRandomChromosome(Random rand) {
-            return new TimeTableChromosome(rand);
-        }        
-    }
-    
     public static void main(String[] args) {
         Map<String, Object> params = new HashMap<>();
         params.put("maxIndex", N);
         params.put("bitMutationRate", 0.2);
         
-        GAOptimizer gaOptimizer = new TimeTableGAOptimizer(100, 20, 50, 0.1,
+        List<Chromosome> initialPopulation = new ArrayList<>();
+        Random rand = new Random();
+        for(int i = 0; i < 100; i++) {
+        	initialPopulation.add(new TimeTableChromosome(rand));
+        }
+        
+        GAOptimizer gaOptimizer = new GAOptimizer(initialPopulation, 
+        								20, 50, 0.1,
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.MUTATE_POINT,
-                                        params);
+                                        true, params);
         gaOptimizer.run(1000);
     }
 }

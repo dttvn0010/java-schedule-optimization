@@ -1,7 +1,9 @@
 package app;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -98,30 +100,23 @@ public class Sudoku {
         }
     }
     
-    static class SudokuGAOptimizer extends GAOptimizer {
-                
-        public SudokuGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
-                SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType,
-                Map<String, Object> params) {
-            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, false, params);
-        }
-        
-        @Override
-        protected Chromosome newRandomChromosome(Random rand) {
-            return new SudokuChromosome(rand);
-        }
-    }
-    
     public static void main(String[] args) {
     	Map<String, Object> params = new HashMap<>();
         params.put("maxIndex", 9);
         params.put("bitMutationRate", 0.1);
         
-        GAOptimizer gaOptimizer = new SudokuGAOptimizer(500, 50, 500, 0.1, 
+        List<Chromosome> initialPopulation = new ArrayList<>();
+        Random rand = new Random();
+        for(int i = 0; i < 500; i++) {
+        	initialPopulation.add(new SudokuChromosome(rand));
+        }
+        
+        GAOptimizer gaOptimizer = new GAOptimizer(initialPopulation,
+        								50, 500, 0.1, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.MUTATE_POINT,
-                                        params);
+                                        false, params);
         gaOptimizer.run(5000);
     }    
 }

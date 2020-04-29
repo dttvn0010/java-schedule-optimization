@@ -1,6 +1,8 @@
 package app;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import api.Chromosome;
@@ -65,32 +67,23 @@ public class TSM {
         }
         
     }
-    
-    static class TSMGAOptimizer extends GAOptimizer {
-    
-        public TSMGAOptimizer(int populationSize, int eliteSize, int crossOverPoolSize, double mutationRate,
-                SelectionType selectionType, CrossOverType crossOverType, MutationType mutationType, 
-                Map<String, Object> params) {
-            super(populationSize, eliteSize, crossOverPoolSize, mutationRate, selectionType, crossOverType, mutationType, true, params);
-        }
-
-        @Override
-        protected Chromosome newRandomChromosome(Random rand) {
-            return new TSMChromosome(rand);
-        }
-
-            
-    }
-    
+        
     public static void main(String[] args) {
         Map<String, Object> params = new HashMap<>();
         params.put("bitMutationRate", 0.2);
         
-        GAOptimizer gaOptimizer = new TSMGAOptimizer(100, 10, 50, 0.05, 
+        List<Chromosome> initialPopulation = new ArrayList<>();
+        Random rand = new Random();
+        for(int i = 0; i < 100; i++) {
+        	initialPopulation.add(new TSMChromosome(rand));
+        }
+        
+        GAOptimizer gaOptimizer = new GAOptimizer(initialPopulation, 
+        								10, 50, 0.05, 
                                         SelectionType.ROULETTE,
                                         CrossOverType.UNIFORM, 
                                         MutationType.SWITCH_POINT, 
-                                        params);
+                                        true, params);
         gaOptimizer.run(500);
     }
 
