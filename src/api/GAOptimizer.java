@@ -128,7 +128,7 @@ public class GAOptimizer {
     }
         
     // Uniform crossover
-    private Chromosome uniformCrossOverUncheck(Chromosome[] parents) {
+    private Chromosome uniformCrossOverUnchecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1];
         
         int N = parent1.encoded.length;
@@ -145,7 +145,7 @@ public class GAOptimizer {
         return parent1.fromEncoded(indexes);
     }
     
-    private Chromosome uniformCrossOver(Chromosome[] parents) {
+    private Chromosome uniformCrossOverChecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1];
         
         int N = parent1.encoded.length;
@@ -172,7 +172,7 @@ public class GAOptimizer {
     }
         
     // One point cross over
-    private Chromosome onePointCrossOverUncheck(Chromosome[] parents) {
+    private Chromosome onePointCrossOverUnchecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1];
         
         int N = parent1.encoded.length;
@@ -191,7 +191,7 @@ public class GAOptimizer {
     }
     
     
-    private Chromosome onePointCrossOver(Chromosome[] parents) {
+    private Chromosome onePointCrossOverChecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1];
         
         int N = parent1.encoded.length;
@@ -214,7 +214,7 @@ public class GAOptimizer {
     }
     
     // uni-three cross over
-    private Chromosome uniThreeParentCrossOverUncheck(Chromosome[] parents) {
+    private Chromosome uniThreeParentCrossOverUnchecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
                 
         int N = parent1.encoded.length;
@@ -231,7 +231,7 @@ public class GAOptimizer {
         return parent1.fromEncoded(indexes);
     }
     
-    private Chromosome uniThreeParentCrossOver(Chromosome[] parents) {
+    private Chromosome uniThreeParentCrossOverChecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
                 
         int N = parent1.encoded.length;
@@ -258,20 +258,20 @@ public class GAOptimizer {
     }
     
     // uni-one-point cross over
-    private Chromosome uniOnePointCrossOverUncheck(Chromosome[] parents) {
+    private Chromosome uniOnePointCrossOverUnchecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
         
-        return onePointCrossOverUncheck(new Chromosome[] {
-            uniformCrossOverUncheck(new Chromosome[] {parent1, parent2}),
+        return onePointCrossOverUnchecked(new Chromosome[] {
+            uniformCrossOverUnchecked(new Chromosome[] {parent1, parent2}),
             parent3
         });        
     }
     
-    private Chromosome uniOnePointCrossOver(Chromosome[] parents) {
+    private Chromosome uniOnePointCrossOverChecked(Chromosome[] parents) {
         Chromosome parent1 = parents[0], parent2 =  parents[1], parent3 = parents[2];
         
-        return onePointCrossOver(new Chromosome[] {
-            uniformCrossOver(new Chromosome[] {parent1, parent2}),
+        return onePointCrossOverChecked(new Chromosome[] {
+            uniformCrossOverChecked(new Chromosome[] {parent1, parent2}),
             parent3
         });        
     }
@@ -285,19 +285,19 @@ public class GAOptimizer {
     
     protected Chromosome crossOver(Chromosome[] parents) {
         if(crossOverType == CrossOverType.UNIFORM) {
-            return checkUnique? uniformCrossOver(parents) : uniformCrossOverUncheck(parents);
+            return checkUnique? uniformCrossOverChecked(parents) : uniformCrossOverUnchecked(parents);
         }
         
         if(crossOverType == CrossOverType.ONE_POINT) {
-            return checkUnique? onePointCrossOver(parents) : onePointCrossOverUncheck(parents);
+            return checkUnique? onePointCrossOverChecked(parents) : onePointCrossOverUnchecked(parents);
         }
         
         if(crossOverType == CrossOverType.UNI_THREE_PARENT) {
-            return checkUnique? uniThreeParentCrossOver(parents) : uniThreeParentCrossOverUncheck(parents);
+            return checkUnique? uniThreeParentCrossOverChecked(parents) : uniThreeParentCrossOverUnchecked(parents);
         }
         
         if(crossOverType == CrossOverType.UNI_ONE_POINT) {
-            return checkUnique? uniOnePointCrossOver(parents) : uniOnePointCrossOverUncheck(parents);
+            return checkUnique? uniOnePointCrossOverChecked(parents) : uniOnePointCrossOverUnchecked(parents);
         }
         
         throw new RuntimeException("Unsupported crossover type: " + crossOverPoolSize);
@@ -322,7 +322,7 @@ public class GAOptimizer {
     }
     
     // Mutate one point
-    private boolean mutateOnePointUncheck(Chromosome c) {
+    private boolean mutateOnePointUnchecked(Chromosome c) {
         double bitMutationRate = (Double) extraParams.get("bitMutationRate");
         int N = (Integer) extraParams.getOrDefault("maxIndex", c.encoded.length);
         
@@ -335,7 +335,7 @@ public class GAOptimizer {
         return true;
     }
     
-    private boolean mutateOnePoint(Chromosome c) {
+    private boolean mutateOnePointChecked(Chromosome c) {
         double bitMutationRate = (Double) extraParams.get("bitMutationRate");
         int N = (Integer) extraParams.getOrDefault("maxIndex", c.encoded.length);
         int k = c.encoded.length;
@@ -364,7 +364,7 @@ public class GAOptimizer {
         }
         
         if(mutationType == MutationType.MUTATE_POINT) {
-            return checkUnique? mutateOnePoint(c) : mutateOnePointUncheck(c);
+            return checkUnique? mutateOnePointChecked(c) : mutateOnePointUnchecked(c);
         }
         
         throw new RuntimeException("Unsupported mutation type: " + mutationType);
